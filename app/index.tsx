@@ -1,29 +1,54 @@
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, View, StyleSheet } from "react-native";
+import PokemonCard from "./components/PokemonCard";
+
+interface Pokemon {
+  name: string;
+  url: string;
+}
 
 export default function Index() {
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Pokemon[]>([]);
+
+  const getPokemons = async () => {
+    try {
+      const URL = "https://pokeapi.co/api/v2/pokemon?limit=20&offset=0";
+      const response = await fetch(URL);
+      const data = await response.json();
+      setResults(data.results);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   useEffect(() => {
-    console.log("entre entre en pantalla");
     getPokemons();
   }, []);
-  const getPokemons = async () => {
-    const URL = "https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0";
-    const response = await fetch(URL, {
-      method: "GET",
-    });
-    console.log(response);
-    const data = await response.json();
-    console.log(data.results);
-    setResults(data.results);
-  };
+
   return (
-    <View>
-      {
-      results.map((item)=> {
-        return <Text key={item.name}>{item.name}</Text>
-      })
-      }
-    </View>
+    <ScrollView style={styles.main}>
+      <View style={styles.listContainer}>
+        {results.map((pokemon) => (
+          <PokemonCard 
+            key={pokemon.name} 
+            name={pokemon.name} 
+            url={pokemon.url} 
+          />
+        ))}
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  main: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  listContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    padding: 10,
+  }
+});
